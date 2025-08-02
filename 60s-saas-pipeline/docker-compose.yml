@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:80"
+    environment:
+      - PORT=80
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+
+  # Uncomment to add a database
+  # db:
+  #   image: postgres:13
+  #   environment:
+  #     POSTGRES_PASSWORD: example
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data/
+
+# volumes:
+#   postgres_data:

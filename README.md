@@ -4,24 +4,35 @@ Welcome to the open-source vault for every AI build shown in [@MohammadEmon-ai](
 
 ## 🎥 Project Showcase
 
-| Short | Repo | Long-Form |
-|---|---|---|
-| SaaS Automation | [`/01-saas-pipeline-60s`](./01-saas-pipeline-60s) | [10-min walkthrough](https://youtu.be/long-form-link) |
-| Prompt Chains | [`/02-prompt-chains`](./02-prompt-chains) | [8-min masterclass](https://youtu.be/long-form-link) |
-| AI Workflows | [`/03-n8n-ai-workflow`](./03-n8n-ai-workflow) | Coming soon |
-| Slack AI Bot | [`/04-slack-support-bot`](./04-slack-support-bot) | Coming soon |
-| Avatar SaaS | [`/05-avatar-saas-demo`](./05-avatar-saas-demo) | Coming soon |
+| Project | Description | Long-Form |
+|---------|-------------|------------|
+| [🚀 60s SaaS Pipeline](./60s-saas-pipeline) | Deploy a production-ready SaaS in under 60 seconds | [Watch Tutorial](https://youtu.be/example) |
+| [🔗 Prompt Chains](./prompt-chains) | Advanced prompt engineering templates | [Masterclass](https://youtu.be/example) |
+| [🤖 Slack Support Bot](./slack-support-bot) | AI-powered customer support automation | Coming Soon |
+| [📚 Long-Form Tutorials](./long-forms) | In-depth video scripts and resources | - |
 
-## 📂 Project Structure
+## 📂 Repository Structure
 
 ```bash
 ai-shorts-lab/
-├── 01-saas-pipeline-60s/       # 60-second SaaS pipeline demo
-├── 02-prompt-chains/           # Advanced prompt chaining examples
-├── 03-n8n-ai-workflow/         # AI automation workflows
-├── 04-slack-support-bot/       # AI-powered Slack support bot
-├── 05-avatar-saas-demo/        # Avatar-based SaaS demo
-└── long-forms/                 # Long-form content and resources
+├── 60s-saas-pipeline/   # FastAPI + Docker SaaS starter
+│   ├── app.py           # FastAPI application
+│   ├── docker-compose.yml
+│   └── README.md
+│
+├── prompt-chains/       # Advanced prompt engineering
+│   ├── chain-template.json
+│   └── README.md
+│
+├── slack-support-bot/   # AI support automation
+│   ├── bot.py
+│   ├── requirements.txt
+│   └── README.md
+│
+└── long-forms/          # 5–10 min tutorial scripts
+    ├── saas-full/
+    ├── prompt-masterclass/
+    └── ...
 ```
 
 ## 🚀 Quick Start
@@ -33,15 +44,32 @@ ai-shorts-lab/
    cd ai-shorts-lab
    ```
 
-2. Navigate to any project folder and follow its README for specific setup instructions.
+2. Navigate to any project and follow its README for setup instructions.
+
+## 🛠️ Tech Stack
+
+- **Backend**: Python, FastAPI, Node.js
+- **AI/ML**: Various AI models and prompt engineering
+- **DevOps**: Docker, CI/CD
+- **Tools**: Slack API, n8n, and more
 
 ## 🤝 Contributing
 
-Found a bug or have an idea? Open an issue or submit a pull request! All contributions are welcome.
+We love contributions! Here's how you can help:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📺 Watch & Learn
+
+Check out the [YouTube channel](https://youtube.com/@MohammadEmon-ai) for video tutorials and demos of these projects in action!
 
 ## ⭐ Star the Repo
 
-If you find this repository helpful, please consider giving it a star! ⭐
+If you find this repository helpful, please give it a star! ⭐
 
 ## 📄 License
 

@@ -1,0 +1,32 @@
+{
+  "name": "Basic Prompt Chain",
+  "version": "1.0.0",
+  "description": "Template for creating prompt chains",
+  "prompts": [
+    {
+      "id": "initial-prompt",
+      "role": "system",
+      "content": "You are a helpful AI assistant.",
+      "next": ["user-query"]
+    },
+    {
+      "id": "user-query",
+      "role": "user",
+      "content": "{{user_input}}",
+      "next": ["processing"]
+    },
+    {
+      "id": "processing",
+      "role": "assistant",
+      "content": "Let me help you with that: {{previous_response}}",
+      "next": []
+    }
+  ],
+  "variables": {
+    "user_input": {
+      "type": "string",
+      "description": "The user's input or question",
+      "required": true
+    }
+  }
+}
