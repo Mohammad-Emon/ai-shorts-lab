@@ -9,6 +9,7 @@ Welcome to the open-source vault for every AI build shown in [@MohammadEmon-ai](
 | [🚀 60s SaaS Pipeline](./60s-saas-pipeline) | Deploy a production-ready SaaS in under 60 seconds | [Watch Tutorial](https://youtu.be/example) |
 | [🔗 Prompt Chains](./prompt-chains) | Advanced prompt engineering templates | [Masterclass](https://youtu.be/example) |
 | [🤖 Slack Support Bot](./slack-support-bot) | AI-powered customer support automation | Coming Soon |
+| [🤖 Proactive AI Decisions](./proactive-ai-decisions) | AI-powered KPI analysis and recommendations | [Tutorial](#) |
 | [📚 Long-Form Tutorials](./long-forms) | In-depth video scripts and resources | - |
 
 ## 📂 Repository Structure
@@ -26,6 +27,12 @@ ai-shorts-lab/
 │
 ├── slack-support-bot/   # AI support automation
 │   ├── bot.py
+│   ├── requirements.txt
+│   └── README.md
+│
+├── proactive-ai-decisions/  # AI KPI analysis
+│   ├── proactive_decisions.py
+│   ├── proactive_decisions_gist.py
 │   ├── requirements.txt
 │   └── README.md
 │
