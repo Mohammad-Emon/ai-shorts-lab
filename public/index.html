@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Guru Agent Demo</title>
+		<style>
+			:root { color-scheme: light dark; }
+			body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; display: grid; place-items: center; min-height: 100vh; background: #0b1020; color: #e6e8ef; }
+			.container { width: min(920px, 92vw); background: #121833; border: 1px solid #2b3566; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden; }
+			header { padding: 16px 20px; border-bottom: 1px solid #2b3566; display: flex; align-items: center; gap: 10px; }
+			header h1 { font-size: 16px; margin: 0; letter-spacing: 0.2px; }
+			main { display: grid; gap: 10px; padding: 16px; }
+			#output { white-space: pre-wrap; background: #0f1430; border: 1px solid #24305f; border-radius: 8px; padding: 12px; min-height: 200px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+			form { display: flex; gap: 8px; }
+			input[type="text"] { flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid #2b3566; background: #0b1028; color: #e6e8ef; }
+			button { padding: 10px 14px; border-radius: 8px; background: #4c6fff; color: white; border: 1px solid #425ce7; cursor: pointer; }
+			button:disabled { opacity: 0.6; cursor: not-allowed; }
+			.small { color: #96a0c8; font-size: 12px; }
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<header>
+				<span>🧠</span>
+				<h1>Guru Agent – One Page Demo</h1>
+			</header>
+			<main>
+				<div id="output" aria-live="polite"></div>
+				<form id="chatForm">
+					<input id="prompt" type="text" placeholder="Ask something..." required />
+					<button id="sendBtn" type="submit">Send</button>
+				</form>
+				<div class="small">Tip: Without `OPENROUTER_API_KEY`, this uses a mock streaming response.</div>
+			</main>
+		</div>
+		<script>
+			const form = document.getElementById('chatForm');
+			const promptInput = document.getElementById('prompt');
+			const output = document.getElementById('output');
+			const sendBtn = document.getElementById('sendBtn');
+			form.addEventListener('submit', (e) => {
+				e.preventDefault();
+				output.textContent = '';
+				sendBtn.disabled = true;
+				const q = encodeURIComponent(promptInput.value.trim());
+				const es = new EventSource(`/api/stream?q=${q}`);
+				es.onmessage = (event) => {
+					try {
+						if (event.data === '[DONE]') { es.close(); sendBtn.disabled = false; return; }
+						const data = JSON.parse(event.data);
+						if (data?.error) { output.textContent += `\n[error] ${data.error}`; return; }
+						const delta = data?.choices?.[0]?.delta?.content ?? '';
+						output.textContent += delta;
+					} catch (err) {
+						console.error(err);
+					}
+				};
+				es.onerror = () => { es.close(); sendBtn.disabled = false; };
+			});
+		</script>
+	</body>
+</html>
