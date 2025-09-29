@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Video Playback</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .video-container {
+            max-width: 512px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        video {
+            width: 100%;
+            border-radius: 20px;
+            border: 2px solid #3b82f6;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎬 Talking Head Video Test</h1>
+    
+    <div class="video-container">
+        <h2>Latest Generated Talking Head Video</h2>
+        <video id="talkingHeadVideo" controls>
+            <source src="http://127.0.0.1:8002/videos/avatar_b555c8ef.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        
+        <div class="controls">
+            <button onclick="playVideo()">▶️ Play</button>
+            <button onclick="pauseVideo()">⏸️ Pause</button>
+            <button onclick="restartVideo()">🔄 Restart</button>
+        </div>
+        
+        <div id="status">Ready to test talking head video</div>
+    </div>
+
+    <script>
+        const video = document.getElementById('talkingHeadVideo');
+        const status = document.getElementById('status');
+        
+        function playVideo() {
+            video.play().then(() => {
+                status.textContent = '▶️ Playing talking head video';
+            }).catch(e => {
+                status.textContent = '❌ Play failed: ' + e.message;
+            });
+        }
+        
+        function pauseVideo() {
+            video.pause();
+            status.textContent = '⏸️ Video paused';
+        }
+        
+        function restartVideo() {
+            video.currentTime = 0;
+            video.play().then(() => {
+                status.textContent = '🔄 Video restarted';
+            }).catch(e => {
+                status.textContent = '❌ Restart failed: ' + e.message;
+            });
+        }
+        
+        // Video event listeners
+        video.addEventListener('loadeddata', () => {
+            status.textContent = '✅ Talking head video loaded successfully';
+        });
+        
+        video.addEventListener('play', () => {
+            status.textContent = '▶️ Talking head is speaking';
+        });
+        
+        video.addEventListener('ended', () => {
+            status.textContent = '🏁 Talking head finished speaking';
+        });
+        
+        video.addEventListener('error', (e) => {
+            status.textContent = '❌ Video error: ' + e.message;
+        });
+        
+        // Auto-load test
+        window.addEventListener('load', () => {
+            status.textContent = '🔄 Loading talking head video...';
+        });
+    </script>
+</body>
+</html>

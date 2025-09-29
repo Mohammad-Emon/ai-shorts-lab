@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-ID Avatar with Sound</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .avatar-section {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .talking-head-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .avatar-image {
+            width: 400px;
+            height: 600px;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .avatar-image.speaking {
+            border-color: rgba(59, 130, 246, 0.8);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+            transform: scale(1.02);
+        }
+
+        .chat-panel {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chat-subtitle {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 85%;
+            animation: messageSlide 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.5;
+            margin-top: 4px;
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .message-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .send-button {
+            background: rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .send-button:hover {
+            background: rgba(59, 130, 246, 0.4);
+            transform: scale(1.05);
+        }
+
+        .avatar-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 15;
+        }
+
+        .control-btn {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: rgba(59, 130, 246, 0.4);
+            border-color: rgba(59, 130, 246, 0.6);
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 15;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 8px;
+            animation: statusPulse 2s infinite;
+        }
+
+        .status-dot.speaking {
+            background: #f59e0b;
+            animation: speakingPulse 0.5s infinite alternate;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes speakingPulse {
+            0% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% { 
+                opacity: 0.7;
+                transform: scale(1.2);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .avatar-section {
+                height: 60vh;
+            }
+            
+            .chat-panel {
+                width: 100%;
+                height: 40vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Avatar Section -->
+        <div class="avatar-section">
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Ready</span>
+            </div>
+
+            <div class="talking-head-container" id="talkingHeadContainer">
+                <img 
+                    class="avatar-image" 
+                    id="avatarImage"
+                    src="http://127.0.0.1:8002/avatar-image"
+                    alt="Avatar"
+                >
+            </div>
+
+            <div class="avatar-controls">
+                <button class="control-btn" id="micBtn" title="Voice Input">🎤</button>
+                <button class="control-btn" id="speakBtn" title="Toggle Speech">🔊</button>
+                <button class="control-btn" id="stopBtn" title="Stop Speech">⏹️</button>
+            </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="chat-panel">
+            <div class="chat-header">
+                <div class="chat-title">D-ID Avatar with Sound</div>
+                <div class="chat-subtitle">AI Avatar with Text-to-Speech</div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="message bot">
+                    <div class="message-content">
+                        Hello! I'm your AI avatar with voice capabilities. I can speak my responses using text-to-speech. Try typing a message!
+                    </div>
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Type your message to hear me speak..."
+                        rows="1"
+                    ></textarea>
+                    <button class="send-button" id="sendButton">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AvatarWithSound {
+            constructor() {
+                this.apiBaseUrl = 'http://127.0.0.1:8002';
+                this.sessionId = this.generateSessionId();
+                this.isProcessing = false;
+                this.isSpeaking = false;
+                this.speechEnabled = true;
+                this.currentUtterance = null;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.initializeSpeechSynthesis();
+                this.initializeSystem();
+            }
+
+            initializeElements() {
+                this.statusIndicator = document.getElementById('statusIndicator');
+                this.statusText = document.getElementById('statusText');
+                this.statusDot = document.getElementById('statusDot');
+                this.avatarImage = document.getElementById('avatarImage');
+                this.messagesContainer = document.getElementById('messagesContainer');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.micBtn = document.getElementById('micBtn');
+                this.speakBtn = document.getElementById('speakBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+            }
+
+            bindEvents() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                
+                this.speakBtn.addEventListener('click', () => this.toggleSpeech());
+                this.stopBtn.addEventListener('click', () => this.stopSpeech());
+                
+                // Auto-resize textarea
+                this.messageInput.addEventListener('input', () => {
+                    this.messageInput.style.height = 'auto';
+                    this.messageInput.style.height = this.messageInput.scrollHeight + 'px';
+                });
+            }
+
+            initializeSpeechSynthesis() {
+                if ('speechSynthesis' in window) {
+                    console.log('✅ Text-to-Speech available');
+                    
+                    // Load voices
+                    speechSynthesis.onvoiceschanged = () => {
+                        this.voices = speechSynthesis.getVoices();
+                        console.log(`✅ ${this.voices.length} voices loaded`);
+                    };
+                } else {
+                    console.log('❌ Text-to-Speech not supported');
+                    this.speechEnabled = false;
+                }
+            }
+
+            async initializeSystem() {
+                this.updateStatus('Initializing...', 'loading');
+                
+                try {
+                    const response = await fetch(`${this.apiBaseUrl}/health`);
+                    if (response.ok) {
+                        this.updateStatus('Ready', 'ready');
+                        console.log('✅ Avatar system initialized');
+                    } else {
+                        throw new Error('Backend not available');
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to initialize:', error);
+                    this.updateStatus('Offline', 'error');
+                }
+            }
+
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message || this.isProcessing) return;
+
+                // Add user message
+                this.addMessage(message, 'user');
+                this.messageInput.value = '';
+                this.messageInput.style.height = 'auto';
+
+                // Update status
+                this.updateStatus('Processing...', 'processing');
+                this.isProcessing = true;
+
+                try {
+                    // Call API
+                    const response = await fetch(`${this.apiBaseUrl}/generate-avatar`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            session_id: this.sessionId,
+                            generate_video: false // Focus on text and speech
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Add bot response
+                    this.addMessage(data.response, 'bot');
+                    
+                    // Speak the response
+                    if (this.speechEnabled) {
+                        this.speakText(data.response);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    const fallbackResponse = "I'm having trouble connecting right now, but I'm here to help! Try asking me something else.";
+                    this.addMessage(fallbackResponse, 'bot');
+                    
+                    if (this.speechEnabled) {
+                        this.speakText(fallbackResponse);
+                    }
+                } finally {
+                    this.isProcessing = false;
+                    this.updateStatus('Ready', 'ready');
+                }
+            }
+
+            speakText(text) {
+                if (!this.speechEnabled || !text) return;
+
+                // Stop any current speech
+                this.stopSpeech();
+
+                // Create new utterance
+                this.currentUtterance = new SpeechSynthesisUtterance(text);
+                
+                // Configure voice
+                if (this.voices && this.voices.length > 0) {
+                    // Try to find a good English voice
+                    const preferredVoice = this.voices.find(voice => 
+                        voice.lang.includes('en') && voice.name.includes('Female')
+                    ) || this.voices.find(voice => 
+                        voice.lang.includes('en')
+                    ) || this.voices[0];
+                    
+                    this.currentUtterance.voice = preferredVoice;
+                }
+                
+                // Configure speech parameters
+                this.currentUtterance.rate = 0.9;
+                this.currentUtterance.pitch = 1.1;
+                this.currentUtterance.volume = 0.8;
+                
+                // Event handlers
+                this.currentUtterance.onstart = () => {
+                    this.isSpeaking = true;
+                    this.updateStatus('Speaking...', 'speaking');
+                    this.avatarImage.classList.add('speaking');
+                };
+                
+                this.currentUtterance.onend = () => {
+                    this.isSpeaking = false;
+                    this.updateStatus('Ready', 'ready');
+                    this.avatarImage.classList.remove('speaking');
+                    this.currentUtterance = null;
+                };
+                
+                this.currentUtterance.onerror = (event) => {
+                    console.error('Speech error:', event.error);
+                    this.isSpeaking = false;
+                    this.updateStatus('Speech Error', 'error');
+                    this.avatarImage.classList.remove('speaking');
+                };
+                
+                // Speak
+                speechSynthesis.speak(this.currentUtterance);
+                console.log('🔊 Speaking:', text.substring(0, 50) + '...');
+            }
+
+            stopSpeech() {
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
+                
+                this.isSpeaking = false;
+                this.currentUtterance = null;
+                this.avatarImage.classList.remove('speaking');
+                this.updateStatus('Ready', 'ready');
+            }
+
+            toggleSpeech() {
+                this.speechEnabled = !this.speechEnabled;
+                
+                if (!this.speechEnabled) {
+                    this.stopSpeech();
+                    this.speakBtn.style.opacity = '0.5';
+                    this.speakBtn.title = 'Speech Disabled';
+                } else {
+                    this.speakBtn.style.opacity = '1';
+                    this.speakBtn.title = 'Speech Enabled';
+                }
+                
+                console.log(`🔊 Speech ${this.speechEnabled ? 'enabled' : 'disabled'}`);
+            }
+
+            addMessage(content, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.textContent = content;
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageDiv.appendChild(contentDiv);
+                messageDiv.appendChild(timeDiv);
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+
+            updateStatus(text, type) {
+                this.statusText.textContent = text;
+                
+                // Update status dot
+                this.statusDot.className = 'status-dot';
+                if (type === 'speaking') {
+                    this.statusDot.classList.add('speaking');
+                }
+            }
+
+            generateSessionId() {
+                return 'session_' + Math.random().toString(36).substr(2, 9);
+            }
+        }
+
+        // Initialize the avatar system
+        document.addEventListener('DOMContentLoaded', () => {
+            window.avatar = new AvatarWithSound();
+            console.log('🎭 Avatar with Sound system initialized!');
+            
+            // Test speech on first load
+            setTimeout(() => {
+                if (window.avatar.speechEnabled) {
+                    window.avatar.speakText("Hello! I'm your AI avatar with voice capabilities. I can speak my responses using text-to-speech.");
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

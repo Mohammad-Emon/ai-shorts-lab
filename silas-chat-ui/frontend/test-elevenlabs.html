@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silas AI Agent - Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .top-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        /* Main Interface */
+        .main-interface {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Initial State */
+        .initial-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .ai-orb {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            cursor: pointer;
+        }
+
+        .orb-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            background: conic-gradient(
+                from 0deg,
+                #1e40af 0deg,
+                #3b82f6 72deg,
+                #06b6d4 144deg,
+                #0891b2 216deg,
+                #1e40af 288deg,
+                #1e40af 360deg
+            );
+            animation: rotate 8s linear infinite;
+            box-shadow: 
+                0 0 60px rgba(59, 130, 246, 0.4),
+                0 0 120px rgba(59, 130, 246, 0.2);
+        }
+
+        .orb-gradient {
+            position: absolute;
+            inset: 3px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at 30% 30%,
+                rgba(59, 130, 246, 0.8) 0%,
+                rgba(29, 78, 216, 0.9) 40%,
+                rgba(15, 23, 42, 0.95) 100%
+            );
+        }
+
+        .orb-shine {
+            position: absolute;
+            top: 20%;
+            left: 25%;
+            width: 40%;
+            height: 40%;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 100%
+            );
+        }
+
+        .call-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .call-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .powered-by {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 40px;
+        }
+
+        /* Ready State */
+        .ready-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 24px;
+        }
+
+        .ready-message {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .start-chat-btn {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .start-chat-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+        /* Chat State */
+        .chat-state {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        .chat-header {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        .chat-messages {
+            position: absolute;
+            top: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 80px);
+            max-width: 600px;
+            height: calc(100vh - 280px);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .chat-messages.show {
+            opacity: 1;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: slideUp 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .message.user .message-avatar {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .message.user .message-content {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .chat-input-area {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 80px);
+            max-width: 600px;
+            z-index: 100;
+        }
+
+        .input-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #messageInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        #messageInput::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 8px;
+        }
+
+        .end-chat-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: rgba(239, 68, 68, 0.9);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .send-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .send-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Voice State */
+        .voice-state {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .voice-orb-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .orb-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .voice-orb {
+            position: relative;
+            width: 280px;
+            height: 280px;
+        }
+
+        .voice-orb .orb-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            background: conic-gradient(
+                from 0deg,
+                #1e40af 0deg,
+                #3b82f6 72deg,
+                #06b6d4 144deg,
+                #0891b2 216deg,
+                #1e40af 288deg,
+                #1e40af 360deg
+            );
+            animation: rotate 8s linear infinite;
+            box-shadow: 
+                0 0 60px rgba(59, 130, 246, 0.4),
+                0 0 120px rgba(59, 130, 246, 0.2);
+        }
+
+        .voice-orb.listening .orb-inner {
+            animation: rotate 8s linear infinite, pulse 2s ease-in-out infinite;
+            box-shadow: 
+                0 0 80px rgba(59, 130, 246, 0.6),
+                0 0 160px rgba(59, 130, 246, 0.3);
+        }
+
+        .voice-orb.thinking .orb-inner {
+            animation: rotate 4s linear infinite, pulse 1s ease-in-out infinite;
+            box-shadow: 
+                0 0 100px rgba(147, 51, 234, 0.6),
+                0 0 200px rgba(147, 51, 234, 0.3);
+            background: conic-gradient(
+                from 0deg,
+                #7c3aed 0deg,
+                #a855f7 72deg,
+                #c084fc 144deg,
+                #e879f9 216deg,
+                #7c3aed 288deg,
+                #7c3aed 360deg
+            );
+        }
+
+        .listening-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 12px 20px;
+            z-index: 10;
+        }
+
+        .listening-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+            animation: listeningPulse 1.5s ease-in-out infinite;
+        }
+
+        .voice-info {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .voice-agent-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .voice-agent-desc {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* Voice Input Area */
+        .voice-input-area {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 80px);
+            max-width: 600px;
+            z-index: 100;
+        }
+
+        .voice-input-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #voiceMessageInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        #voiceMessageInput::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .voice-input-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 8px;
+        }
+
+        .end-call-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: rgba(239, 68, 68, 0.9);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .end-call-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .chat-mode-btn {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: rgba(16, 185, 129, 0.9);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-mode-btn:hover {
+            background: rgba(16, 185, 129, 0.25);
+        }
+
+        .voice-send-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .voice-send-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Avatar Container */
+        .avatar-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .avatar-video-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.1) 0%, 
+                rgba(147, 51, 234, 0.1) 100%);
+        }
+
+        .avatar-face {
+            position: relative;
+            z-index: 2;
+        }
+
+        .face-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.3) 0%, 
+                rgba(147, 51, 234, 0.3) 100%);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: faceIdle 4s ease-in-out infinite;
+        }
+
+        .face-features {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .eyes {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            width: 60px;
+            margin-left: 10px;
+        }
+
+        .eye {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            position: relative;
+            animation: blink 3s ease-in-out infinite;
+        }
+
+        .eye::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.8);
+        }
+
+        .mouth {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 15px;
+        }
+
+        .mouth-shape {
+            width: 100%;
+            height: 100%;
+            border-radius: 0 0 15px 15px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.2s ease;
+        }
+
+        /* Lip-sync animations */
+        .mouth.talking .mouth-shape {
+            animation: lipSync 0.3s ease-in-out infinite alternate;
+        }
+
+        .mouth.speaking-a .mouth-shape {
+            border-radius: 50%;
+            height: 20px;
+            width: 20px;
+        }
+
+        .mouth.speaking-e .mouth-shape {
+            border-radius: 10px;
+            height: 12px;
+            width: 25px;
+        }
+
+        .mouth.speaking-o .mouth-shape {
+            border-radius: 50%;
+            height: 18px;
+            width: 18px;
+        }
+
+        /* Precise mouth shapes */
+        .mouth.mouth-open .mouth-shape {
+            border-radius: 50%;
+            height: 22px;
+            width: 22px;
+        }
+
+        .mouth.mouth-narrow .mouth-shape {
+            border-radius: 10px;
+            height: 8px;
+            width: 28px;
+        }
+
+        .mouth.mouth-round .mouth-shape {
+            border-radius: 50%;
+            height: 16px;
+            width: 16px;
+        }
+
+        .mouth.mouth-closed .mouth-shape {
+            border-radius: 15px;
+            height: 4px;
+            width: 24px;
+        }
+
+        /* Facial expressions */
+        .face-circle.emotion-happy {
+            background: linear-gradient(135deg, 
+                rgba(16, 185, 129, 0.4) 0%, 
+                rgba(59, 130, 246, 0.3) 100%);
+        }
+
+        .face-circle.emotion-excited {
+            background: linear-gradient(135deg, 
+                rgba(245, 158, 11, 0.4) 0%, 
+                rgba(239, 68, 68, 0.3) 100%);
+            animation: faceIdle 2s ease-in-out infinite;
+        }
+
+        .face-circle.emotion-concerned {
+            background: linear-gradient(135deg, 
+                rgba(107, 114, 128, 0.4) 0%, 
+                rgba(75, 85, 99, 0.3) 100%);
+        }
+
+        .face-circle.emotion-curious {
+            background: linear-gradient(135deg, 
+                rgba(147, 51, 234, 0.4) 0%, 
+                rgba(59, 130, 246, 0.3) 100%);
+        }
+
+        .face-circle.emotion-neutral {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.3) 0%, 
+                rgba(147, 51, 234, 0.3) 100%);
+        }
+
+        .avatar-info {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .avatar-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .avatar-desc {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* Avatar states */
+        .avatar-container.listening {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 
+                0 20px 40px rgba(59, 130, 246, 0.2),
+                0 0 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .avatar-container.speaking {
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 
+                0 20px 40px rgba(16, 185, 129, 0.2),
+                0 0 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .avatar-container.thinking {
+            border-color: rgba(147, 51, 234, 0.4);
+            box-shadow: 
+                0 20px 40px rgba(147, 51, 234, 0.2),
+                0 0 30px rgba(147, 51, 234, 0.3);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: slideUp 0.3s ease;
+            margin-bottom: 16px;
+        }
+
+        .typing-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .typing-content {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.8);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .typing-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Animations */
+        @keyframes typing {
+            0%, 60%, 100% { 
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% { 
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+
+        @keyframes listeningPulse {
+            0%, 100% { 
+                opacity: 0.7;
+            }
+            50% { 
+                opacity: 1;
+            }
+        }
+
+        @keyframes faceIdle {
+            0%, 100% { 
+                transform: scale(1);
+            }
+            50% { 
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes blink {
+            0%, 90%, 100% { 
+                transform: scaleY(1);
+            }
+            95% { 
+                transform: scaleY(0.1);
+            }
+        }
+
+        @keyframes lipSync {
+            0% { 
+                height: 15px;
+                width: 30px;
+                border-radius: 0 0 15px 15px;
+            }
+            25% { 
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+            }
+            50% { 
+                height: 12px;
+                width: 35px;
+                border-radius: 10px;
+            }
+            75% { 
+                height: 18px;
+                width: 25px;
+                border-radius: 25px;
+            }
+            100% { 
+                height: 15px;
+                width: 30px;
+                border-radius: 0 0 15px 15px;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .ai-orb {
+                width: 220px;
+                height: 220px;
+            }
+            
+            .voice-orb {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .avatar-container {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .voice-orb-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .chat-messages {
+                padding: 16px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .voice-orb {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .avatar-container {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .face-circle {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .face-features {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="brand">
+            <span class="brand-icon">🤖</span>
+            <span class="brand-text">SilasLabs</span>
+        </div>
+        <div class="top-actions">
+            <button class="top-btn">💬</button>
+        </div>
+    </div>
+
+    <!-- Main Interface -->
+    <div class="main-interface">
+        <!-- Initial State -->
+        <div class="initial-state" id="initialState">
+            <div class="ai-orb" id="aiOrb">
+                <div class="orb-inner">
+                    <div class="orb-gradient"></div>
+                    <div class="orb-shine"></div>
+                </div>
+                <button class="call-button" id="callButton">
+                    <span class="call-icon">🎤</span>
+                    <span class="call-text">Call AI agent</span>
+                </button>
+            </div>
+            <div class="powered-by">
+                Powered by SilasLabs Agents
+            </div>
+        </div>
+
+        <!-- Ready State -->
+        <div class="ready-state" id="readyState">
+            <div class="ready-message">Ready to start chatting?</div>
+            <button class="start-chat-btn" id="startChatBtn">Start Chat</button>
+        </div>
+
+        <!-- Voice State -->
+        <div class="voice-state" id="voiceState">
+            <div class="voice-orb-container">
+                <!-- Blue Orb Section -->
+                <div class="orb-section">
+                    <div class="voice-orb listening" id="voiceOrb">
+                        <div class="orb-inner">
+                            <div class="orb-gradient"></div>
+                            <div class="orb-shine"></div>
+                        </div>
+                        <div class="listening-indicator" id="listeningIndicator">
+                            <span class="listening-text">Listening...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="voice-info">
+                        <div class="voice-agent-title">Voice Agent</div>
+                        <div class="voice-agent-desc">Speech recognition & controls</div>
+                    </div>
+                </div>
+
+                <!-- Avatar Section -->
+                <div class="avatar-section">
+                    <div class="avatar-container" id="avatarContainer">
+                        <div class="avatar-video-wrapper" id="avatarVideoWrapper">
+                            <!-- Avatar video will be inserted here -->
+                            <div class="avatar-placeholder" id="avatarPlaceholder">
+                                <div class="avatar-face" id="avatarFace">
+                                    <div class="face-circle">
+                                        <div class="face-features">
+                                            <div class="eyes">
+                                                <div class="eye left-eye"></div>
+                                                <div class="eye right-eye"></div>
+                                            </div>
+                                            <div class="mouth" id="avatarMouth">
+                                                <div class="mouth-shape"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="avatar-info">
+                        <div class="avatar-title">Silas Avatar</div>
+                        <div class="avatar-desc">AI talking head with lip-sync</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="voice-input-area">
+                <div class="voice-input-container">
+                    <input 
+                        type="text" 
+                        id="voiceMessageInput" 
+                        placeholder="Send a message to start the conversation"
+                        maxlength="500"
+                    >
+                    <div class="voice-input-actions">
+                        <button class="end-call-btn" id="endCallBtn">
+                            <span>✕</span>
+                            <span>End call</span>
+                        </button>
+                        <button class="chat-mode-btn" id="chatModeBtn">
+                            <span>💬</span>
+                            <span>Chat</span>
+                        </button>
+                        <button class="voice-send-btn" id="voiceSendBtn">
+                            <span>🎤</span>
+                            <span>Send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat State -->
+        <div class="chat-state" id="chatState">
+            <div class="chat-header">
+                Hi there! How can I assist you today?
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages appear here -->
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Send a message to start the conversation"
+                        maxlength="500"
+                    >
+                    <div class="input-actions">
+                        <button class="end-chat-btn" id="endChatBtn">
+                            <span>✕</span>
+                            <span>End chat</span>
+                        </button>
+                        <button class="send-btn" id="sendBtn">
+                            <span>🎤</span>
+                            <span>Send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('Script loaded');
+        
+        // Elements
+        const initialState = document.getElementById('initialState');
+        const readyState = document.getElementById('readyState');
+        const voiceState = document.getElementById('voiceState');
+        const chatState = document.getElementById('chatState');
+        const callButton = document.getElementById('callButton');
+        const startChatBtn = document.getElementById('startChatBtn');
+        const endChatBtn = document.getElementById('endChatBtn');
+        const endCallBtn = document.getElementById('endCallBtn');
+        const chatModeBtn = document.getElementById('chatModeBtn');
+        const messageInput = document.getElementById('messageInput');
+        const voiceMessageInput = document.getElementById('voiceMessageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const voiceSendBtn = document.getElementById('voiceSendBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        const voiceOrb = document.getElementById('voiceOrb');
+        const listeningIndicator = document.getElementById('listeningIndicator');
+        const avatarContainer = document.getElementById('avatarContainer');
+        const avatarMouth = document.getElementById('avatarMouth');
+        const avatarFace = document.getElementById('avatarFace');
+
+        console.log('Elements found:', {
+            initialState: !!initialState,
+            readyState: !!readyState,
+            chatState: !!chatState,
+            callButton: !!callButton,
+            startChatBtn: !!startChatBtn
+        });
+
+        // State management
+        function showState(state) {
+            console.log('Switching to state:', state);
+            
+            initialState.style.display = state === 'initial' ? 'flex' : 'none';
+            readyState.style.display = state === 'ready' ? 'flex' : 'none';
+            voiceState.style.display = state === 'voice' ? 'flex' : 'none';
+            chatState.style.display = state === 'chat' ? 'flex' : 'none';
+        }
+
+        // Event listeners
+        callButton.addEventListener('click', () => {
+            console.log('Call button clicked - starting voice mode');
+            showState('voice');
+            startListening();
+        });
+
+        startChatBtn.addEventListener('click', () => {
+            console.log('Start chat button clicked');
+            showState('chat');
+            setTimeout(() => {
+                messageInput.focus();
+            }, 300);
+        });
+
+        chatModeBtn.addEventListener('click', () => {
+            console.log('Switching to manual chat mode');
+            showState('chat');
+            setTimeout(() => {
+                messageInput.focus();
+            }, 300);
+        });
+
+        endChatBtn.addEventListener('click', () => {
+            console.log('End chat button clicked');
+            chatMessages.innerHTML = '';
+            chatMessages.classList.remove('show');
+            showState('initial');
+        });
+
+        endCallBtn.addEventListener('click', () => {
+            console.log('End call button clicked');
+            stopListening();
+            showState('initial');
+        });
+
+        sendBtn.addEventListener('click', () => sendMessage(messageInput, chatMessages));
+        voiceSendBtn.addEventListener('click', () => sendVoiceMessage());
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage(messageInput, chatMessages);
+            }
+        });
+
+        voiceMessageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendVoiceMessage();
+            }
+        });
+
+        // Message handling
+        function addMessage(type, content, metadata = {}, container = chatMessages) {
+            console.log('Adding message:', type, content, metadata);
+            
+            // For voice mode, we don't show messages in UI, just store them
+            if (container === voiceMessages) {
+                voiceMessages.push({
+                    type: type,
+                    content: content,
+                    metadata: metadata,
+                    timestamp: new Date()
+                });
+                return;
+            }
+            
+            if (!container.classList.contains('show')) {
+                container.classList.add('show');
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'user' ? 'U' : 'S';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            const textP = document.createElement('p');
+            textP.textContent = content;
+            messageContent.appendChild(textP);
+            
+            // Add metadata info for bot messages
+            if (type === 'bot' && metadata) {
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'message-meta';
+                metaDiv.style.fontSize = '11px';
+                metaDiv.style.opacity = '0.6';
+                metaDiv.style.marginTop = '8px';
+                metaDiv.style.color = 'rgba(255, 255, 255, 0.5)';
+                
+                let metaText = '';
+                if (metadata.workflowType === 'collaborative') {
+                    metaText = `🤖 Multi-Agent: ${metadata.agentsUsed?.join(', ') || 'multiple agents'}`;
+                } else if (metadata.workflowType === 'parallel') {
+                    metaText = `⚡ Parallel: ${metadata.agentsUsed?.join(', ') || 'multiple agents'}`;
+                } else if (metadata.workflowType === 'specialized_agent') {
+                    metaText = `🎯 ${metadata.agentsUsed?.[0] || 'Agent'}: ${metadata.modelUsed || 'AI Model'}`;
+                } else if (metadata.modelUsed) {
+                    metaText = `🧠 ${metadata.modelUsed}`;
+                }
+                
+                if (metaText) {
+                    metaDiv.textContent = metaText;
+                    messageContent.appendChild(metaDiv);
+                }
+            }
+            
+            // Add timestamp
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'message-time';
+            timeSpan.style.fontSize = '11px';
+            timeSpan.style.opacity = '0.5';
+            timeSpan.style.marginTop = '6px';
+            timeSpan.style.display = 'block';
+            timeSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            messageContent.appendChild(timeSpan);
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendMessage(inputElement, messagesContainer) {
+            const message = inputElement.value.trim();
+            if (!message) return;
+
+            console.log('Sending message:', message);
+            
+            addMessage('user', message, {}, messagesContainer);
+            inputElement.value = '';
+
+            // Show typing indicator
+            showTypingIndicator(true, messagesContainer);
+
+            try {
+                // Call backend API
+                const response = await fetch('http://127.0.0.1:8001/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: message,
+                        session_id: generateSessionId(),
+                        use_multi_agent: true
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Hide typing indicator
+                showTypingIndicator(false, messagesContainer);
+                
+                // Add bot response with workflow info
+                addMessage('bot', data.response, {
+                    workflowType: data.workflow_type,
+                    agentsUsed: data.agents_used,
+                    modelUsed: data.model_used
+                }, messagesContainer);
+                
+                // If in voice mode, speak the response
+                if (messagesContainer === voiceMessages) {
+                    speakResponse(data.response);
+                }
+                
+            } catch (error) {
+                console.error('Error calling backend:', error);
+                showTypingIndicator(false, messagesContainer);
+                
+                // Fallback response
+                const fallbackResponses = [
+                    "I'm having some connection issues, but I'm still here to help! Let me try to assist you.",
+                    "My backend is currently offline, but I can still provide some basic responses.",
+                    "Connection error - but don't worry, I'm working on getting my full multi-agent system back online!"
+                ];
+                
+                const fallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+                addMessage('bot', fallback, { workflowType: 'offline', modelUsed: 'fallback' }, messagesContainer);
+            }
+        }
+
+        async function sendVoiceMessage() {
+            const message = voiceMessageInput.value.trim();
+            if (!message) return;
+
+            console.log('Sending voice message:', message);
+            
+            voiceMessageInput.value = '';
+            
+            // Show thinking state
+            showTypingIndicator(true, voiceMessages);
+
+            try {
+                // Call voice-optimized backend API
+                const response = await fetch('http://127.0.0.1:8001/voice/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: message,
+                        session_id: generateSessionId()
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Hide thinking indicator
+                showTypingIndicator(false, voiceMessages);
+                
+                // Store the conversation
+                addMessage('user', message, {}, voiceMessages);
+                addMessage('bot', data.response, {
+                    workflowType: data.workflow_type,
+                    agentsUsed: data.agents_used,
+                    modelUsed: data.model_used
+                }, voiceMessages);
+                
+                // Speak the response with avatar sync
+                if (data.avatar_data) {
+                    speakResponseWithAvatar(data.response, data.avatar_data);
+                } else {
+                    speakResponse(data.response);
+                }
+                
+            } catch (error) {
+                console.error('Error calling voice backend:', error);
+                showTypingIndicator(false, voiceMessages);
+                
+                // Fallback voice response
+                const fallback = "I'm having some connection issues, but I'm still here to help you!";
+                addMessage('user', message, {}, voiceMessages);
+                addMessage('bot', fallback, { workflowType: 'offline', modelUsed: 'fallback' }, voiceMessages);
+                speakResponse(fallback);
+            }
+        }
+
+        // Voice functionality
+        let recognition = null;
+        let isListening = false;
+        let voiceMessages = []; // Store voice messages separately
+
+        function startListening() {
+            console.log('Starting voice listening...');
+            isListening = true;
+            
+            // Update UI to show listening state
+            voiceOrb.classList.add('listening');
+            avatarContainer.classList.add('listening');
+            listeningIndicator.style.display = 'block';
+            
+            // Initialize speech recognition if available
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+                
+                recognition.onresult = (event) => {
+                    let finalTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    
+                    if (finalTranscript) {
+                        console.log('Voice input:', finalTranscript);
+                        voiceMessageInput.value = finalTranscript;
+                        sendVoiceMessage();
+                    }
+                };
+                
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                };
+                
+                recognition.start();
+            } else {
+                console.log('Speech recognition not supported');
+                // Show manual input as fallback
+                setTimeout(() => {
+                    voiceMessageInput.focus();
+                }, 300);
+            }
+        }
+
+        function stopListening() {
+            console.log('Stopping voice listening...');
+            isListening = false;
+            
+            // Update UI
+            voiceOrb.classList.remove('listening');
+            avatarContainer.classList.remove('listening', 'speaking', 'thinking');
+            listeningIndicator.style.display = 'none';
+            stopAvatarSpeaking();
+            
+            // Stop speech recognition
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+        }
+
+        function speakResponse(text) {
+            // Use Web Speech API for text-to-speech with avatar sync
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 0.8;
+                
+                // Try to use a good voice
+                const voices = speechSynthesis.getVoices();
+                const preferredVoice = voices.find(voice => 
+                    voice.name.includes('Google') || 
+                    voice.name.includes('Microsoft') ||
+                    voice.lang.startsWith('en')
+                );
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                // Avatar speaking events
+                utterance.onstart = () => {
+                    startAvatarSpeaking();
+                };
+                
+                utterance.onend = () => {
+                    stopAvatarSpeaking();
+                };
+                
+                speechSynthesis.speak(utterance);
+                
+                // Sync lip movements with speech
+                syncLipMovements(text);
+            }
+        }
+
+        // Avatar control functions
+        function startAvatarSpeaking() {
+            avatarContainer.classList.remove('listening', 'thinking');
+            avatarContainer.classList.add('speaking');
+            avatarMouth.classList.add('talking');
+        }
+
+        function stopAvatarSpeaking() {
+            avatarContainer.classList.remove('speaking');
+            avatarMouth.classList.remove('talking');
+            avatarMouth.className = 'mouth'; // Reset mouth shape
+        }
+
+        function setAvatarThinking() {
+            avatarContainer.classList.remove('listening', 'speaking');
+            avatarContainer.classList.add('thinking');
+            stopAvatarSpeaking();
+        }
+
+        function syncLipMovements(text) {
+            // Simple lip-sync based on vowels and consonants
+            const words = text.split(' ');
+            let delay = 0;
+            
+            words.forEach((word, index) => {
+                setTimeout(() => {
+                    if (avatarMouth.classList.contains('talking')) {
+                        // Analyze word for mouth shapes
+                        if (word.match(/[aA]/)) {
+                            avatarMouth.className = 'mouth talking speaking-a';
+                        } else if (word.match(/[eE]/)) {
+                            avatarMouth.className = 'mouth talking speaking-e';
+                        } else if (word.match(/[oO]/)) {
+                            avatarMouth.className = 'mouth talking speaking-o';
+                        } else {
+                            avatarMouth.className = 'mouth talking';
+                        }
+                    }
+                }, delay);
+                
+                delay += 300; // Approximate word timing
+            });
+        }
+
+        function speakResponseWithAvatar(text, avatarData) {
+            // Enhanced speech with precise avatar synchronization
+            if ('speechSynthesis' in window && avatarData) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 0.8;
+                
+                // Try to use a good voice
+                const voices = speechSynthesis.getVoices();
+                const preferredVoice = voices.find(voice => 
+                    voice.name.includes('Google') || 
+                    voice.name.includes('Microsoft') ||
+                    voice.lang.startsWith('en')
+                );
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                // Avatar speaking events
+                utterance.onstart = () => {
+                    startAvatarSpeaking();
+                    syncAvatarWithData(avatarData);
+                };
+                
+                utterance.onend = () => {
+                    stopAvatarSpeaking();
+                };
+                
+                speechSynthesis.speak(utterance);
+            } else {
+                // Fallback to regular speech
+                speakResponse(text);
+            }
+        }
+
+        function syncAvatarWithData(avatarData) {
+            if (!avatarData || avatarData.type === 'error') {
+                syncLipMovements(text); // Fallback to simple sync
+                return;
+            }
+            
+            // Apply facial expressions
+            if (avatarData.expressions) {
+                applyFacialExpression(avatarData.expressions);
+            }
+            
+            // Sync lip movements with precise timing
+            if (avatarData.lip_sync) {
+                syncPreciseLipMovements(avatarData.lip_sync);
+            }
+        }
+
+        function applyFacialExpression(expressions) {
+            // Apply emotion-based styling to the avatar
+            const faceCircle = avatarFace.querySelector('.face-circle');
+            
+            // Reset classes
+            faceCircle.className = 'face-circle';
+            
+            // Apply emotion
+            switch (expressions.emotion) {
+                case 'happy':
+                    faceCircle.classList.add('emotion-happy');
+                    break;
+                case 'excited':
+                    faceCircle.classList.add('emotion-excited');
+                    break;
+                case 'concerned':
+                    faceCircle.classList.add('emotion-concerned');
+                    break;
+                case 'curious':
+                    faceCircle.classList.add('emotion-curious');
+                    break;
+                default:
+                    faceCircle.classList.add('emotion-neutral');
+            }
+        }
+
+        function syncPreciseLipMovements(lipSyncData) {
+            lipSyncData.forEach((wordData, index) => {
+                setTimeout(() => {
+                    if (avatarMouth.classList.contains('talking')) {
+                        // Apply mouth shapes based on phoneme analysis
+                        const shapes = wordData.mouth_shapes;
+                        animateWordMouthShapes(shapes, wordData.duration);
+                    }
+                }, wordData.start_time * 1000);
+            });
+        }
+
+        function animateWordMouthShapes(shapes, duration) {
+            const shapeInterval = duration * 1000 / shapes.length;
+            
+            shapes.forEach((shape, index) => {
+                setTimeout(() => {
+                    if (avatarMouth.classList.contains('talking')) {
+                        avatarMouth.className = `mouth talking mouth-${shape}`;
+                    }
+                }, index * shapeInterval);
+            });
+        }
+
+        // Generate session ID
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Typing indicator
+        function showTypingIndicator(show, container = chatMessages) {
+            // For voice mode, show visual feedback on the orb and avatar
+            if (container === voiceMessages) {
+                if (show) {
+                    voiceOrb.classList.add('thinking');
+                    setAvatarThinking();
+                    listeningIndicator.querySelector('.listening-text').textContent = 'Thinking...';
+                } else {
+                    voiceOrb.classList.remove('thinking');
+                    avatarContainer.classList.remove('thinking');
+                    avatarContainer.classList.add('listening');
+                    listeningIndicator.querySelector('.listening-text').textContent = 'Listening...';
+                }
+                return;
+            }
+            
+            let typingDiv = document.getElementById('typingIndicator');
+            
+            if (show && !typingDiv) {
+                typingDiv = document.createElement('div');
+                typingDiv.id = 'typingIndicator';
+                typingDiv.className = 'typing-indicator';
+                typingDiv.innerHTML = `
+                    <div class="typing-avatar">S</div>
+                    <div class="typing-content">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span class="typing-text">Silas is thinking...</span>
+                    </div>
+                `;
+                container.appendChild(typingDiv);
+                container.scrollTop = container.scrollHeight;
+            } else if (!show && typingDiv) {
+                typingDiv.remove();
+            }
+        }
+
+        // Initialize
+        console.log('Initializing...');
+        showState('initial');
+    </script>
+</body>
+</html>

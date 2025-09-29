@@ -1,0 +1,7 @@
+
+# This is a placeholder - please save your actual photo as 'silas-chat-ui/my_photo.jpg'
+# The photo should be:
+# - Clear front-facing shot
+# - Good lighting
+# - At least 256x256 pixels
+# - Face clearly visible

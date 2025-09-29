@@ -1,0 +1,23 @@
+
+# Real Face Avatar Setup
+
+To use your real face instead of cartoon avatars:
+
+1. Save your photo as 'silas-chat-ui/my_photo.jpg'
+
+2. Photo requirements:
+   - Clear front-facing shot
+   - Good lighting
+   - At least 256x256 pixels (512x512 recommended)
+   - Face clearly visible
+   - Neutral expression
+
+3. Supported formats: JPG, JPEG, PNG
+
+4. After saving your photo, run:
+   python silas-chat-ui/fix_real_avatar_issues.py
+
+5. Then launch the system:
+   python silas-chat-ui/launch_real_face_avatar.py
+
+Your real face will be used for talking head generation!

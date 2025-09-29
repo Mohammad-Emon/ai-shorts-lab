@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silas Chat UI - Glassmorphism Demo</title>
+    <link rel="stylesheet" href="frontend/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="avatar-info">
+                <div class="avatar-status online"></div>
+                <h1>Silas</h1>
+                <span class="status-text">Multi-Agent AI Assistant</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" title="Multi-Agent Mode">🤖</button>
+                <button class="btn-icon">⚙️</button>
+                <button class="btn-icon">⛶</button>
+            </div>
+        </header>
+
+        <!-- Avatar Section -->
+        <div class="avatar-section">
+            <div class="avatar-container">
+                <div class="avatar-placeholder">
+                    <div class="avatar-ready">
+                        <div class="avatar-circle">
+                            <span>S</span>
+                        </div>
+                        <p>Silas is ready</p>
+                    </div>
+                </div>
+            </div>
+            <div class="avatar-controls">
+                <button class="btn-control">🔊</button>
+                <button class="btn-control">📹</button>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <div class="chat-messages">
+                <!-- Bot Message -->
+                <div class="message bot-message">
+                    <div class="message-avatar">S</div>
+                    <div class="message-content">
+                        <p>✨ Welcome! I'm Silas, your multi-agent AI assistant. I have 6 specialized AI agents ready to collaborate on your queries. Try asking me something complex to see the magic happen!</p>
+                        <span class="message-time">Just now</span>
+                        <div class="message-info" style="font-size: 10px; opacity: 0.6; margin-top: 5px;">
+                            🤖 Multi-Agent: coordinator, researcher, creative
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Message -->
+                <div class="message user-message">
+                    <div class="message-avatar">U</div>
+                    <div class="message-content">
+                        <p>This glassmorphism design looks amazing! Can you tell me about the multi-agent system?</p>
+                        <span class="message-time">Just now</span>
+                    </div>
+                </div>
+
+                <!-- Bot Response -->
+                <div class="message bot-message">
+                    <div class="message-avatar">S</div>
+                    <div class="message-content">
+                        <p>🚀 Absolutely! The multi-agent system includes 6 specialized AI agents that collaborate:</p>
+                        <p><strong>Coordinator</strong> - Routes queries and orchestrates workflows<br>
+                        <strong>Researcher</strong> - Gathers factual information<br>
+                        <strong>Creative</strong> - Generates innovative ideas<br>
+                        <strong>Technical</strong> - Solves programming problems<br>
+                        <strong>Analyst</strong> - Provides insights and analysis<br>
+                        <strong>Summarizer</strong> - Synthesizes responses</p>
+                        <span class="message-time">Just now</span>
+                        <div class="message-info" style="font-size: 10px; opacity: 0.6; margin-top: 5px;">
+                            ⚡ Parallel: coordinator, researcher, technical, summarizer
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typing Indicator -->
+                <div class="typing-indicator show">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span>Silas is thinking...</span>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="chat-input-section">
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        placeholder="Ask me anything about AI, coding, or creative projects..." 
+                        value="How does the glassmorphism effect work?"
+                    >
+                    <button class="btn-send">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="input-actions">
+                    <button class="btn-action">🎤</button>
+                    <button class="btn-action">😊</button>
+                    <span class="char-count">42/500</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Info -->
+    <div style="position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 15px; color: rgba(255, 255, 255, 0.8); font-size: 12px; max-width: 200px;">
+        <strong>🎨 Glassmorphism Demo</strong><br>
+        • Dark theme with glass effects<br>
+        • Backdrop blur & transparency<br>
+        • Animated gradients<br>
+        • Multi-agent workflow UI<br>
+        • Responsive design
+    </div>
+
+    <style>
+        /* Additional demo styles */
+        .avatar-ready {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 2;
+        }
+        .avatar-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: rgba(120, 119, 198, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(120, 119, 198, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            font-weight: 700;
+            box-shadow: 
+                0 20px 40px rgba(120, 119, 198, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: pulse 3s infinite ease-in-out;
+            position: relative;
+        }
+        .avatar-circle::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            background: conic-gradient(from 0deg, 
+                rgba(120, 119, 198, 0.8), 
+                rgba(255, 119, 198, 0.8), 
+                rgba(120, 219, 255, 0.8), 
+                rgba(120, 119, 198, 0.8));
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 8s linear infinite;
+            opacity: 0.6;
+        }
+        .avatar-ready p {
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+    </style>
+</body>
+</html>

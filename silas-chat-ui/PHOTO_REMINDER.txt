@@ -1,0 +1,16 @@
+
+# Photo Setup Reminder
+
+Save your photo from the chat as: silas-chat-ui/my_photo.jpg
+
+Requirements:
+- Clear front-facing photo
+- Face clearly visible
+- Good lighting
+- At least 256x256 pixels
+
+After saving, run:
+python silas-chat-ui/save_user_photo.py
+
+Then test D-ID:
+python silas-chat-ui/test_did_video.py

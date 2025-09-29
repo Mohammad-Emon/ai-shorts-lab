@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time D-ID Style Talking Head</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main Layout - Side by Side */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Real-Time Avatar Section - Left Side */
+        .avatar-section {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Real Talking Head Video Container */
+        .talking-head-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        /* Main Talking Head Video */
+        .talking-head-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            z-index: 5;
+        }
+
+        /* Avatar Image (Static when not speaking) */
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 3;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Hide avatar image when video is playing */
+        .talking-head-video.playing ~ .avatar-image {
+            opacity: 0;
+        }
+
+        /* Video Generation Status */
+        .generation-status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px 30px;
+            text-align: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .generation-status.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .generation-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        /* Chat Panel - Right Side */
+        .chat-panel {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chat-subtitle {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* Messages Area */
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 85%;
+            animation: messageSlide 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.5;
+            margin-top: 4px;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .message-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .send-button {
+            background: rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .send-button:hover {
+            background: rgba(59, 130, 246, 0.4);
+            transform: scale(1.05);
+        }
+
+        /* Avatar Controls */
+        .avatar-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 15;
+        }
+
+        .control-btn {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: rgba(59, 130, 246, 0.4);
+            border-color: rgba(59, 130, 246, 0.6);
+        }
+
+        .control-btn.listening {
+            background: rgba(139, 92, 246, 0.4);
+            border-color: rgba(139, 92, 246, 0.6);
+            animation: pulse 1s infinite;
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 15;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 8px;
+            animation: statusPulse 2s infinite;
+        }
+
+        .status-dot.speaking {
+            background: #f59e0b;
+            animation: speakingPulse 0.5s infinite alternate;
+        }
+
+        .status-dot.generating {
+            background: #3b82f6;
+            animation: generatingPulse 1s infinite;
+        }
+
+        /* Video Quality Badge */
+        .video-quality {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 15;
+        }
+
+        /* Animations */
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes speakingPulse {
+            0% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% { 
+                opacity: 0.7;
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes generatingPulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.5;
+                transform: scale(1.3);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .avatar-section {
+                height: 60vh;
+            }
+            
+            .chat-panel {
+                width: 100%;
+                height: 40vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Real-Time Talking Head Section -->
+        <div class="avatar-section">
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Ready</span>
+            </div>
+
+            <div class="video-quality" id="videoQuality">
+                HD Ready
+            </div>
+
+            <div class="talking-head-container" id="talkingHeadContainer">
+                <!-- Real talking head video will be inserted here -->
+                <video 
+                    class="talking-head-video" 
+                    id="talkingHeadVideo"
+                    style="display: none;"
+                    autoplay 
+                    muted="false"
+                    playsInline
+                >
+                </video>
+
+                <!-- Static avatar image (shown when not speaking) -->
+                <img 
+                    class="avatar-image" 
+                    id="avatarImage"
+                    src="http://127.0.0.1:8002/avatar-image"
+                    alt="Avatar"
+                    onerror="this.style.display='none'"
+                >
+
+                <!-- Video Generation Status -->
+                <div class="generation-status" id="generationStatus">
+                    <div class="generation-spinner"></div>
+                    <p>Generating realistic talking head...</p>
+                    <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">
+                        Creating lip-sync with SadTalker
+                    </p>
+                </div>
+            </div>
+
+            <div class="avatar-controls">
+                <button class="control-btn" id="micBtn" title="Voice Input (Space)">🎤</button>
+                <button class="control-btn" id="pauseBtn" title="Pause Video (P)" style="display: none;">⏸️</button>
+                <button class="control-btn" id="stopBtn" title="Stop Video (S)" style="display: none;">⏹️</button>
+                <button class="control-btn" id="replayBtn" title="Replay Video (R)" style="display: none;">🔄</button>
+                <button class="control-btn" id="settingsBtn" title="Settings">⚙️</button>
+            </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="chat-panel">
+            <div class="chat-header">
+                <div class="chat-title">Real-Time D-ID Avatar</div>
+                <div class="chat-subtitle">Realistic Talking Head with Perfect Lip-Sync</div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="message bot">
+                    <div class="message-content">
+                        Hello! I'm your real-time D-ID style avatar. I generate realistic talking head videos with perfect lip-sync. Watch me speak with natural expressions and mouth movements!
+                    </div>
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Type your message to see me speak with realistic lip-sync..."
+                        rows="1"
+                    ></textarea>
+                    <button class="send-button" id="sendButton">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Real-Time D-ID Style Talking Head Controller
+        class RealTimeTalkingHead {
+            constructor() {
+                this.apiBaseUrl = 'http://127.0.0.1:8002';
+                this.sessionId = this.generateSessionId();
+                this.isProcessing = false;
+                this.currentVideo = null;
+                this.isListening = false;
+                this.recognition = null;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.initializeSpeechRecognition();
+                this.initializeSystem();
+            }
+
+            initializeElements() {
+                this.statusIndicator = document.getElementById('statusIndicator');
+                this.statusText = document.getElementById('statusText');
+                this.statusDot = document.getElementById('statusDot');
+                this.videoQuality = document.getElementById('videoQuality');
+                this.talkingHeadContainer = document.getElementById('talkingHeadContainer');
+                this.talkingHeadVideo = document.getElementById('talkingHeadVideo');
+                this.avatarImage = document.getElementById('avatarImage');
+                this.generationStatus = document.getElementById('generationStatus');
+                this.messagesContainer = document.getElementById('messagesContainer');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.micBtn = document.getElementById('micBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.replayBtn = document.getElementById('replayBtn');
+                this.settingsBtn = document.getElementById('settingsBtn');
+            }
+
+            bindEvents() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                
+                this.micBtn.addEventListener('click', () => this.toggleVoiceInput());
+                this.pauseBtn.addEventListener('click', () => this.pauseVideo());
+                this.stopBtn.addEventListener('click', () => this.stopVideo());
+                this.replayBtn.addEventListener('click', () => this.replayVideo());
+                this.settingsBtn.addEventListener('click', () => this.openSettings());
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+                
+                // Auto-resize textarea
+                this.messageInput.addEventListener('input', () => {
+                    this.messageInput.style.height = 'auto';
+                    this.messageInput.style.height = this.messageInput.scrollHeight + 'px';
+                });
+            }
+
+            initializeSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = false;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'en-US';
+                    
+                    this.recognition.onstart = () => {
+                        this.isListening = true;
+                        this.micBtn.classList.add('active', 'listening');
+                        this.updateStatus('Listening...', 'listening');
+                    };
+                    
+                    this.recognition.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            transcript += event.results[i][0].transcript;
+                        }
+                        this.messageInput.value = transcript;
+                        
+                        if (event.results[event.results.length - 1].isFinal) {
+                            this.stopVoiceInput();
+                            if (transcript.trim()) {
+                                this.sendMessage();
+                            }
+                        }
+                    };
+                    
+                    this.recognition.onerror = (event) => {
+                        console.error('Speech recognition error:', event.error);
+                        this.stopVoiceInput();
+                        this.updateStatus('Voice Error', 'error');
+                    };
+                    
+                    this.recognition.onend = () => {
+                        this.stopVoiceInput();
+                    };
+                }
+            }
+
+            async initializeSystem() {
+                this.updateStatus('Initializing...', 'loading');
+                
+                try {
+                    const response = await fetch(`${this.apiBaseUrl}/health`);
+                    if (response.ok) {
+                        this.updateStatus('Ready', 'ready');
+                        console.log('✅ Real-time talking head system initialized');
+                    } else {
+                        throw new Error('Backend not available');
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to initialize:', error);
+                    this.updateStatus('Offline', 'error');
+                }
+            }
+
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message || this.isProcessing) return;
+
+                // Add user message to chat
+                this.addMessage(message, 'user');
+                this.messageInput.value = '';
+                this.messageInput.style.height = 'auto';
+
+                // Start video generation process
+                this.isProcessing = true;
+                this.showGenerationStatus();
+                this.updateStatus('Generating talking head...', 'generating');
+
+                try {
+                    // Call the avatar generation API
+                    const response = await fetch(`${this.apiBaseUrl}/generate-avatar`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            session_id: this.sessionId,
+                            generate_video: true,
+                            video_quality: 'hd',
+                            enable_realistic_mode: true
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Add bot response to chat
+                    this.addMessage(data.response, 'bot');
+                    
+                    // Play the realistic talking head video
+                    if (data.video_url) {
+                        await this.playTalkingHeadVideo(data.video_url, data.response);
+                    } else {
+                        // Fallback to TTS with avatar image animation
+                        this.playTTSWithAnimation(data.response);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error generating talking head:', error);
+                    this.addMessage('I apologize, but I\'m having trouble generating the video right now. Let me speak with voice only.', 'bot');
+                    this.playTTSWithAnimation('I apologize, but I\'m having trouble generating the video right now. Let me speak with voice only.');
+                } finally {
+                    this.isProcessing = false;
+                    this.hideGenerationStatus();
+                }
+            }
+
+            async playTalkingHeadVideo(videoUrl, text) {
+                console.log('🎬 Playing real-time talking head video:', videoUrl);
+                
+                try {
+                    // Set up the video source
+                    const fullVideoUrl = `${this.apiBaseUrl}${videoUrl}`;
+                    this.talkingHeadVideo.src = fullVideoUrl;
+                    
+                    // Show video, hide static image
+                    this.talkingHeadVideo.style.display = 'block';
+                    this.talkingHeadVideo.classList.add('playing');
+                    this.avatarImage.style.opacity = '0';
+                    
+                    // Update status
+                    this.updateStatus('Speaking with lip-sync', 'speaking');
+                    this.videoQuality.textContent = 'HD Talking Head';
+                    this.showVideoControls();
+                    
+                    // Handle video events
+                    this.talkingHeadVideo.onloadeddata = () => {
+                        console.log('✅ Talking head video loaded');
+                        this.hideGenerationStatus();
+                        
+                        // Force play the video
+                        this.talkingHeadVideo.play().catch(e => {
+                            console.log('Autoplay prevented, trying user interaction:', e);
+                            // If autoplay fails, show a play button or try alternative
+                            this.handleAutoplayRestriction();
+                        });
+                    };
+                    
+                    this.talkingHeadVideo.onplay = () => {
+                        console.log('▶️ Talking head video started playing');
+                        this.updateStatus('Lip-sync active', 'speaking');
+                    };
+                    
+                    this.talkingHeadVideo.onended = () => {
+                        console.log('🏁 Talking head video ended');
+                        this.resetToStaticAvatar();
+                    };
+                    
+                    this.talkingHeadVideo.onerror = (e) => {
+                        console.error('❌ Talking head video error:', e);
+                        this.resetToStaticAvatar();
+                        this.playTTSWithAnimation(text);
+                    };
+                    
+                    this.currentVideo = this.talkingHeadVideo;
+                    
+                } catch (error) {
+                    console.error('❌ Error setting up talking head video:', error);
+                    this.resetToStaticAvatar();
+                    this.playTTSWithAnimation(text);
+                }
+            }
+
+            handleAutoplayRestriction() {
+                // Create a user-clickable play button overlay
+                const playOverlay = document.createElement('div');
+                playOverlay.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.8);
+                    border-radius: 50%;
+                    width: 80px;
+                    height: 80px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    z-index: 20;
+                    font-size: 30px;
+                    color: white;
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                `;
+                playOverlay.innerHTML = '▶️';
+                playOverlay.title = 'Click to play talking head video';
+                
+                playOverlay.onclick = () => {
+                    this.talkingHeadVideo.play();
+                    playOverlay.remove();
+                };
+                
+                this.talkingHeadContainer.appendChild(playOverlay);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (playOverlay.parentNode) {
+                        playOverlay.remove();
+                    }
+                }, 5000);
+            }
+
+            playTTSWithAnimation(text) {
+                // Fallback: Use TTS with animated static avatar
+                this.updateStatus('Speaking with TTS', 'speaking');
+                
+                // Animate the static avatar image
+                this.avatarImage.style.transform = 'scale(1.05)';
+                this.avatarImage.style.filter = 'brightness(1.1)';
+                
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1.1;
+                    utterance.volume = 0.9;
+                    
+                    utterance.onend = () => {
+                        this.resetToStaticAvatar();
+                    };
+                    
+                    speechSynthesis.speak(utterance);
+                } else {
+                    // No TTS available, just reset after delay
+                    setTimeout(() => {
+                        this.resetToStaticAvatar();
+                    }, 3000);
+                }
+            }
+
+            resetToStaticAvatar() {
+                // Hide video, show static avatar
+                this.talkingHeadVideo.style.display = 'none';
+                this.talkingHeadVideo.classList.remove('playing');
+                this.avatarImage.style.opacity = '1';
+                this.avatarImage.style.transform = 'scale(1)';
+                this.avatarImage.style.filter = 'brightness(1)';
+                
+                // Reset status
+                this.updateStatus('Ready', 'ready');
+                this.videoQuality.textContent = 'HD Ready';
+                this.hideVideoControls();
+                
+                this.currentVideo = null;
+            }
+
+            showGenerationStatus() {
+                this.generationStatus.classList.add('active');
+            }
+
+            hideGenerationStatus() {
+                this.generationStatus.classList.remove('active');
+            }
+
+            showVideoControls() {
+                this.pauseBtn.style.display = 'flex';
+                this.stopBtn.style.display = 'flex';
+                this.replayBtn.style.display = 'flex';
+            }
+
+            hideVideoControls() {
+                this.pauseBtn.style.display = 'none';
+                this.stopBtn.style.display = 'none';
+                this.replayBtn.style.display = 'none';
+            }
+
+            updateStatus(text, type) {
+                this.statusText.textContent = text;
+                
+                // Update status dot
+                this.statusDot.className = 'status-dot';
+                if (type === 'speaking') {
+                    this.statusDot.classList.add('speaking');
+                } else if (type === 'generating') {
+                    this.statusDot.classList.add('generating');
+                }
+            }
+
+            addMessage(content, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.textContent = content;
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageDiv.appendChild(contentDiv);
+                messageDiv.appendChild(timeDiv);
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+
+            // Voice Input Methods
+            toggleVoiceInput() {
+                if (this.isListening) {
+                    this.stopVoiceInput();
+                } else {
+                    this.startVoiceInput();
+                }
+            }
+
+            startVoiceInput() {
+                if (this.recognition) {
+                    this.recognition.start();
+                }
+            }
+
+            stopVoiceInput() {
+                this.isListening = false;
+                this.micBtn.classList.remove('active', 'listening');
+                this.updateStatus('Ready', 'ready');
+                if (this.recognition) {
+                    this.recognition.stop();
+                }
+            }
+
+            // Video Control Methods
+            pauseVideo() {
+                if (this.currentVideo && !this.currentVideo.paused) {
+                    this.currentVideo.pause();
+                    this.updateStatus('Paused', 'paused');
+                } else if (this.currentVideo) {
+                    this.currentVideo.play();
+                    this.updateStatus('Speaking with lip-sync', 'speaking');
+                }
+            }
+
+            stopVideo() {
+                if (this.currentVideo) {
+                    this.currentVideo.pause();
+                    this.currentVideo.currentTime = 0;
+                    this.resetToStaticAvatar();
+                }
+            }
+
+            replayVideo() {
+                if (this.currentVideo) {
+                    this.currentVideo.currentTime = 0;
+                    this.currentVideo.play();
+                    this.updateStatus('Replaying lip-sync', 'speaking');
+                }
+            }
+
+            openSettings() {
+                alert('Settings panel coming soon!\n\nCurrent features:\n• Real-time talking head generation\n• Perfect lip-sync with SadTalker\n• Voice input and output\n• HD video quality');
+            }
+
+            // Keyboard Shortcuts
+            handleKeyboardShortcuts(e) {
+                if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+                
+                switch(e.key.toLowerCase()) {
+                    case ' ':
+                        e.preventDefault();
+                        this.toggleVoiceInput();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        this.pauseVideo();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        this.stopVideo();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        this.replayVideo();
+                        break;
+                }
+            }
+
+            // Utility Methods
+            generateSessionId() {
+                return 'session_' + Math.random().toString(36).substr(2, 9);
+            }
+        }
+
+        // Initialize the real-time talking head system
+        document.addEventListener('DOMContentLoaded', () => {
+            window.talkingHead = new RealTimeTalkingHead();
+            console.log('🎭 Real-time D-ID style talking head system initialized!');
+        });
+    </script>
+</body>
+</html>

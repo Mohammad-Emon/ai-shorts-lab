@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silas Visual Agent - D-ID Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main Layout - D-ID Style */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Avatar Video Section */
+        .avatar-section {
+            flex: 1;
+            position: relative;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-video-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+        }
+
+        .avatar-placeholder {
+            width: 400px;
+            height: 600px;
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.1) 0%, 
+                rgba(147, 51, 234, 0.1) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .placeholder-content {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .placeholder-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 600;
+        }
+
+        /* Chat Panel - Glassmorphism */
+        .chat-panel {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }   
+     /* Chat Header */
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chat-subtitle {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* Messages Area */
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 85%;
+            animation: messageSlide 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.5;
+            margin-top: 4px;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .message-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .send-button {
+            background: rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .send-button:hover {
+            background: rgba(59, 130, 246, 0.4);
+            transform: scale(1.05);
+        }  
+      /* Avatar Controls */
+        .avatar-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .control-btn.listening {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+            animation: pulse 1s infinite;
+        }
+
+        /* Avatar Speaking States */
+        .avatar-placeholder.speaking {
+            animation: avatarSpeaking 0.3s ease-in-out infinite alternate;
+        }
+
+        .placeholder-avatar {
+            transition: all 0.2s ease;
+        }
+
+        /* Voice Control Hints */
+        .voice-hints {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .voice-hints.show {
+            opacity: 1;
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Animations */
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes avatarSpeaking {
+            0% { 
+                transform: scale(1.05);
+                filter: brightness(1.2);
+            }
+            100% { 
+                transform: scale(1.08);
+                filter: brightness(1.3);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .avatar-section {
+                height: 60vh;
+            }
+            
+            .chat-panel {
+                width: 100%;
+                height: 40vh;
+            }
+            
+            .avatar-placeholder {
+                width: 300px;
+                height: 400px;
+            }
+        }
+    </style>
+</head><body>
+   
+ <div class="main-container">
+        <!-- Avatar Video Section -->
+        <div class="avatar-section">
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot"></span>
+                <span id="statusText">Ready</span>
+            </div>
+
+            <div class="avatar-video-container" id="avatarContainer">
+                <!-- Video will be inserted here -->
+                <div class="avatar-placeholder" id="avatarPlaceholder">
+                    <div class="placeholder-content">
+                        <div class="placeholder-avatar">S</div>
+                        <h3>Silas Visual Agent</h3>
+                        <p>AI-powered talking avatar</p>
+                        <p style="margin-top: 10px; font-size: 12px; opacity: 0.6;">
+                            Powered by SadTalker + OpenRouter LLM
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="avatar-controls">
+                <button class="control-btn" id="micBtn" title="Toggle Voice Input (Space)">🎤</button>
+                <button class="control-btn" id="pauseBtn" title="Pause/Resume Speech (P)" style="display: none;">⏸️</button>
+                <button class="control-btn" id="stopBtn" title="Stop Speech (S)" style="display: none;">⏹️</button>
+                <button class="control-btn" id="cameraBtn" title="Camera">📹</button>
+                <button class="control-btn" id="settingsBtn" title="Settings">⚙️</button>
+            </div>
+            
+            <div class="voice-hints" id="voiceHints">
+                Space: Voice | P: Pause | S: Stop | Enter: Type
+            </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="chat-panel">
+            <div class="chat-header">
+                <div class="chat-title">Chat</div>
+                <div class="chat-subtitle">Conversation with Silas</div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="message bot">
+                    <div class="message-content">
+                        Hello! I'm Silas, your visual AI agent. I can see, hear, and respond with realistic video. How can I help you today?
+                    </div>
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Type your message here..."
+                        rows="1"
+                    ></textarea>
+                    <button class="send-button" id="sendButton">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>    <sc
+ript>
+        // D-ID Style Visual Agent Controller
+        class VisualAgent {
+            constructor() {
+                this.apiBaseUrl = 'http://127.0.0.1:8001';
+                this.sessionId = this.generateSessionId();
+                this.isProcessing = false;
+                this.currentVideo = null;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.initializeAgent();
+            }
+
+            initializeElements() {
+                this.statusIndicator = document.getElementById('statusIndicator');
+                this.statusText = document.getElementById('statusText');
+                this.avatarContainer = document.getElementById('avatarContainer');
+                this.avatarPlaceholder = document.getElementById('avatarPlaceholder');
+                this.messagesContainer = document.getElementById('messagesContainer');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.micBtn = document.getElementById('micBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.cameraBtn = document.getElementById('cameraBtn');
+                this.settingsBtn = document.getElementById('settingsBtn');
+                
+                // Voice control state
+                this.isAvatarSpeaking = false;
+                this.currentUtterance = null;
+                this.recognition = null;
+                this.speakingInterval = null;
+            }
+
+            bindEvents() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                
+                this.micBtn.addEventListener('click', () => this.toggleMicrophone());
+                this.pauseBtn.addEventListener('click', () => this.togglePauseSpeech());
+                this.stopBtn.addEventListener('click', () => this.stopSpeech());
+                this.cameraBtn.addEventListener('click', () => this.toggleCamera());
+                this.settingsBtn.addEventListener('click', () => this.openSettings());
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+                
+                // Voice synthesis events
+                if ('speechSynthesis' in window) {
+                    speechSynthesis.addEventListener('voiceschanged', () => {
+                        console.log('🔊 Voices loaded:', speechSynthesis.getVoices().length);
+                    });
+                }
+                
+                // Auto-resize textarea
+                this.messageInput.addEventListener('input', () => {
+                    this.messageInput.style.height = 'auto';
+                    this.messageInput.style.height = this.messageInput.scrollHeight + 'px';
+                });
+            }
+
+            async initializeAgent() {
+                this.updateStatus('Initializing...', 'loading');
+                
+                try {
+                    // Check backend connection
+                    const response = await fetch(`${this.apiBaseUrl}/health`);
+                    if (response.ok) {
+                        this.updateStatus('Ready', 'ready');
+                        console.log('✅ Visual Agent initialized successfully');
+                    } else {
+                        throw new Error('Backend not available');
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to initialize:', error);
+                    this.updateStatus('Offline', 'error');
+                }
+            }
+
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message || this.isProcessing) return;
+
+                // Add user message to chat
+                this.addMessage(message, 'user');
+                this.messageInput.value = '';
+                this.messageInput.style.height = 'auto';
+
+                // Update status
+                this.updateStatus('Processing...', 'processing');
+                this.isProcessing = true;
+
+                try {
+                    // Call visual agent API
+                    const response = await fetch(`${this.apiBaseUrl}/visual/process`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            content: message,
+                            session_id: this.sessionId,
+                            generate_video: true
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Add bot response to chat
+                    this.addMessage(data.response, 'bot');
+                    
+                    // Generate and play avatar video
+                    if (data.video_data) {
+                        await this.playAvatarVideo(data.video_data, data.response);
+                    }
+                    
+                    this.updateStatus('Ready', 'ready');
+                    
+                } catch (error) {
+                    console.error('Error processing message:', error);
+                    this.addMessage('I apologize, but I\'m having trouble processing your request right now. Please try again.', 'bot');
+                    this.updateStatus('Error', 'error');
+                } finally {
+                    this.isProcessing = false;
+                }
+            }         
+   addMessage(content, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.textContent = content;
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageDiv.appendChild(contentDiv);
+                messageDiv.appendChild(timeDiv);
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+
+            async playAvatarVideo(videoData, text) {
+                this.updateStatus('Generating video...', 'processing');
+                
+                try {
+                    // For now, simulate video generation with placeholder
+                    // In production, this would integrate with SadTalker or similar service
+                    
+                    if (videoData.type === 'sadtalker_video') {
+                        // Handle SadTalker generated video
+                        await this.displayVideo(videoData.video_url);
+                    } else {
+                        // Fallback: Show animated placeholder with TTS
+                        await this.simulateVideoWithTTS(text);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error playing avatar video:', error);
+                    this.updateStatus('Ready', 'ready');
+                }
+            }
+
+            async displayVideo(videoUrl) {
+                // Create video element
+                const video = document.createElement('video');
+                video.src = videoUrl;
+                video.autoplay = true;
+                video.muted = false;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+                
+                // Replace placeholder with video
+                this.avatarContainer.innerHTML = '';
+                this.avatarContainer.appendChild(video);
+                
+                // Reset to placeholder when video ends
+                video.addEventListener('ended', () => {
+                    setTimeout(() => {
+                        this.resetToPlaceholder();
+                    }, 1000);
+                });
+                
+                this.updateStatus('Speaking', 'speaking');
+            }
+
+            async simulateVideoWithTTS(text) {
+                // Animate placeholder while speaking
+                this.avatarPlaceholder.style.transform = 'scale(1.05)';
+                this.avatarPlaceholder.style.filter = 'brightness(1.2)';
+                
+                // Enhanced TTS with voice selection
+                if ('speechSynthesis' in window) {
+                    // Stop any current speech
+                    speechSynthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    
+                    // Configure voice settings
+                    utterance.rate = 0.85;  // Slightly slower for clarity
+                    utterance.pitch = 1.1;  // Slightly higher pitch
+                    utterance.volume = 0.9;
+                    
+                    // Try to select a good voice
+                    const voices = speechSynthesis.getVoices();
+                    const preferredVoice = this.selectBestVoice(voices);
+                    if (preferredVoice) {
+                        utterance.voice = preferredVoice;
+                    }
+                    
+                    // Add speech events
+                    utterance.onstart = () => {
+                        this.updateStatus('Speaking', 'speaking');
+                        this.isAvatarSpeaking = true;
+                        this.animateAvatarSpeaking();
+                    };
+                    
+                    utterance.onend = () => {
+                        this.resetToPlaceholder();
+                        this.updateStatus('Ready', 'ready');
+                        this.isAvatarSpeaking = false;
+                        this.stopAvatarSpeaking();
+                    };
+                    
+                    utterance.onerror = (event) => {
+                        console.error('TTS Error:', event.error);
+                        this.resetToPlaceholder();
+                        this.updateStatus('Ready', 'ready');
+                        this.isAvatarSpeaking = false;
+                    };
+                    
+                    // Speak with enhanced settings
+                    speechSynthesis.speak(utterance);
+                    
+                    // Store current utterance for controls
+                    this.currentUtterance = utterance;
+                }
+            }
+
+            resetToPlaceholder() {
+                this.avatarContainer.innerHTML = `
+                    <div class="avatar-placeholder" id="avatarPlaceholder">
+                        <div class="placeholder-content">
+                            <div class="placeholder-avatar">S</div>
+                            <h3>Silas Visual Agent</h3>
+                            <p>AI-powered talking avatar</p>
+                            <p style="margin-top: 10px; font-size: 12px; opacity: 0.6;">
+                                Powered by SadTalker + OpenRouter LLM
+                            </p>
+                        </div>
+                    </div>
+                `;
+                this.avatarPlaceholder = document.getElementById('avatarPlaceholder');
+                this.avatarPlaceholder.style.transform = 'scale(1)';
+                this.avatarPlaceholder.style.filter = 'brightness(1)';
+            }
+
+            // Voice Control Methods
+            toggleMicrophone() {
+                if (this.micBtn.classList.contains('active')) {
+                    this.stopVoiceInput();
+                } else {
+                    this.startVoiceInput();
+                }
+            }
+
+            startVoiceInput() {
+                console.log('🎤 Starting voice input...');
+                
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    alert('Speech recognition not supported in this browser. Please use Chrome or Edge.');
+                    return;
+                }
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                this.recognition = new SpeechRecognition();
+                
+                this.recognition.continuous = true;
+                this.recognition.interimResults = true;
+                this.recognition.lang = 'en-US';
+                
+                this.recognition.onstart = () => {
+                    this.micBtn.classList.add('active', 'listening');
+                    this.updateStatus('Listening...', 'listening');
+                    this.showVoiceHints();
+                    console.log('🎤 Voice input started');
+                };
+                
+                this.recognition.onresult = (event) => {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    // Show interim results in input
+                    if (interimTranscript) {
+                        this.messageInput.value = interimTranscript;
+                        this.messageInput.style.fontStyle = 'italic';
+                        this.messageInput.style.opacity = '0.7';
+                    }
+                    
+                    // Process final transcript
+                    if (finalTranscript.trim()) {
+                        this.messageInput.value = finalTranscript.trim();
+                        this.messageInput.style.fontStyle = 'normal';
+                        this.messageInput.style.opacity = '1';
+                        
+                        // Auto-send after voice input
+                        setTimeout(() => {
+                            this.sendMessage();
+                        }, 500);
+                    }
+                };
+                
+                this.recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    this.updateStatus('Voice Error', 'error');
+                    this.stopVoiceInput();
+                };
+                
+                this.recognition.onend = () => {
+                    if (this.micBtn.classList.contains('active')) {
+                        // Restart if still active
+                        setTimeout(() => {
+                            if (this.micBtn.classList.contains('active')) {
+                                this.recognition.start();
+                            }
+                        }, 100);
+                    }
+                };
+                
+                this.recognition.start();
+            }
+
+            stopVoiceInput() {
+                console.log('🎤 Stopping voice input...');
+                
+                if (this.recognition) {
+                    this.recognition.stop();
+                    this.recognition = null;
+                }
+                
+                this.micBtn.classList.remove('active', 'listening');
+                this.updateStatus('Ready', 'ready');
+                
+                // Reset input styling
+                this.messageInput.style.fontStyle = 'normal';
+                this.messageInput.style.opacity = '1';
+            }
+
+            selectBestVoice(voices) {
+                // Priority order for voice selection
+                const voicePreferences = [
+                    // Google voices (high quality)
+                    (voice) => voice.name.includes('Google') && voice.lang.startsWith('en'),
+                    // Microsoft voices
+                    (voice) => voice.name.includes('Microsoft') && voice.lang.startsWith('en'),
+                    // Apple voices
+                    (voice) => voice.name.includes('Apple') && voice.lang.startsWith('en'),
+                    // Any English voice
+                    (voice) => voice.lang.startsWith('en-US'),
+                    (voice) => voice.lang.startsWith('en'),
+                    // Default voice
+                    (voice) => voice.default
+                ];
+                
+                for (const preference of voicePreferences) {
+                    const voice = voices.find(preference);
+                    if (voice) {
+                        console.log('🔊 Selected voice:', voice.name);
+                        return voice;
+                    }
+                }
+                
+                return voices[0]; // Fallback to first available
+            }
+
+            animateAvatarSpeaking() {
+                // Add speaking animation to avatar
+                if (this.avatarPlaceholder) {
+                    this.avatarPlaceholder.classList.add('speaking');
+                    
+                    // Simulate mouth movement
+                    this.speakingInterval = setInterval(() => {
+                        if (this.isAvatarSpeaking) {
+                            const intensity = Math.random() * 0.3 + 0.7;
+                            this.avatarPlaceholder.style.transform = `scale(${1 + intensity * 0.05})`;
+                            this.avatarPlaceholder.style.filter = `brightness(${1 + intensity * 0.2})`;
+                        }
+                    }, 150);
+                }
+            }
+
+            stopAvatarSpeaking() {
+                if (this.speakingInterval) {
+                    clearInterval(this.speakingInterval);
+                    this.speakingInterval = null;
+                }
+                
+                if (this.avatarPlaceholder) {
+                    this.avatarPlaceholder.classList.remove('speaking');
+                }
+            }
+
+            // Voice control methods
+            pauseSpeech() {
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.pause();
+                    this.updateStatus('Paused', 'paused');
+                }
+            }
+
+            resumeSpeech() {
+                if (speechSynthesis.paused) {
+                    speechSynthesis.resume();
+                    this.updateStatus('Speaking', 'speaking');
+                }
+            }
+
+            stopSpeech() {
+                speechSynthesis.cancel();
+                this.isAvatarSpeaking = false;
+                this.stopAvatarSpeaking();
+                this.resetToPlaceholder();
+                this.updateStatus('Ready', 'ready');
+            }
+
+            togglePauseSpeech() {
+                if (speechSynthesis.speaking && !speechSynthesis.paused) {
+                    this.pauseSpeech();
+                    this.pauseBtn.textContent = '▶️';
+                    this.pauseBtn.title = 'Resume Speech (P)';
+                } else if (speechSynthesis.paused) {
+                    this.resumeSpeech();
+                    this.pauseBtn.textContent = '⏸️';
+                    this.pauseBtn.title = 'Pause Speech (P)';
+                }
+            }
+
+            showVoiceControls() {
+                this.pauseBtn.style.display = 'flex';
+                this.stopBtn.style.display = 'flex';
+            }
+
+            hideVoiceControls() {
+                this.pauseBtn.style.display = 'none';
+                this.stopBtn.style.display = 'none';
+                this.pauseBtn.textContent = '⏸️';
+                this.pauseBtn.title = 'Pause Speech (P)';
+            }
+
+            showVoiceHints() {
+                const hints = document.getElementById('voiceHints');
+                if (hints) {
+                    hints.classList.add('show');
+                    setTimeout(() => {
+                        hints.classList.remove('show');
+                    }, 3000);
+                }
+            }
+
+            handleKeyboardShortcuts(event) {
+                // Don't trigger shortcuts when typing in input
+                if (event.target === this.messageInput) return;
+                
+                switch (event.key.toLowerCase()) {
+                    case ' ': // Spacebar - Toggle microphone
+                        event.preventDefault();
+                        this.toggleMicrophone();
+                        break;
+                    case 'p': // P - Pause/Resume speech
+                        event.preventDefault();
+                        this.togglePauseSpeech();
+                        break;
+                    case 's': // S - Stop speech
+                        event.preventDefault();
+                        this.stopSpeech();
+                        break;
+                    case 'enter': // Enter - Focus input
+                        if (!this.messageInput.matches(':focus')) {
+                            event.preventDefault();
+                            this.messageInput.focus();
+                        }
+                        break;
+                    case 'escape': // Escape - Stop voice input
+                        event.preventDefault();
+                        this.stopVoiceInput();
+                        break;
+                }
+            }
+
+            toggleCamera() {
+                this.cameraBtn.classList.toggle('active');
+                // TODO: Implement camera controls for avatar customization
+                console.log('Camera toggled');
+            }
+
+            openSettings() {
+                // TODO: Implement settings panel
+                console.log('Settings opened');
+            }
+
+            updateStatus(text, type) {
+                this.statusText.textContent = text;
+                
+                const dot = this.statusIndicator.querySelector('.status-dot');
+                dot.className = 'status-dot';
+                
+                switch (type) {
+                    case 'ready':
+                        dot.style.background = '#10b981';
+                        dot.style.animation = 'none';
+                        this.hideVoiceControls();
+                        break;
+                    case 'listening':
+                        dot.style.background = '#8b5cf6';
+                        dot.style.animation = 'pulse 1s infinite';
+                        break;
+                    case 'processing':
+                        dot.style.background = '#f59e0b';
+                        dot.style.animation = 'pulse 1.5s infinite';
+                        break;
+                    case 'speaking':
+                        dot.style.background = '#3b82f6';
+                        dot.style.animation = 'pulse 0.8s infinite';
+                        this.showVoiceControls();
+                        break;
+                    case 'paused':
+                        dot.style.background = '#f97316';
+                        dot.style.animation = 'none';
+                        break;
+                    case 'error':
+                        dot.style.background = '#ef4444';
+                        dot.style.animation = 'none';
+                        this.hideVoiceControls();
+                        break;
+                    default:
+                        dot.style.background = '#6b7280';
+                        dot.style.animation = 'none';
+                }
+            }
+
+            generateSessionId() {
+                return 'visual_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+        }
+
+        // Initialize Visual Agent when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.visualAgent = new VisualAgent();
+            console.log('🎭 D-ID Style Visual Agent initialized');
+        });
+    </script>
+</body>
+</html>
+                console.log('Settings opened');
+            }   
+            updateStatus(text, type) {
+                this.statusText.textContent = text;
+                
+                const dot = this.statusIndicator.querySelector('.status-dot');
+                dot.className = 'status-dot';
+                
+                switch (type) {
+                    case 'ready':
+                        dot.style.background = '#10b981';
+                        dot.style.animation = 'none';
+                        this.hideVoiceControls();
+                        break;
+                    case 'listening':
+                        dot.style.background = '#8b5cf6';
+                        dot.style.animation = 'pulse 1s infinite';
+                        break;
+                    case 'processing':
+                        dot.style.background = '#f59e0b';
+                        dot.style.animation = 'pulse 1.5s infinite';
+                        break;
+                    case 'speaking':
+                        dot.style.background = '#3b82f6';
+                        dot.style.animation = 'pulse 0.8s infinite';
+                        this.showVoiceControls();
+                        break;
+                    case 'paused':
+                        dot.style.background = '#f97316';
+                        dot.style.animation = 'none';
+                        break;
+                    case 'error':
+                        dot.style.background = '#ef4444';
+                        dot.style.animation = 'none';
+                        this.hideVoiceControls();
+                        break;
+                    default:
+                        dot.style.background = '#6b7280';
+                        dot.style.animation = 'none';
+                }
+            }
+
+            generateSessionId() {
+                return 'visual_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+        }
+
+        // Initialize Visual Agent when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.visualAgent = new VisualAgent();
+            console.log('🎭 D-ID Style Visual Agent initialized');
+        });
+    </script>
+</body>
+</html>

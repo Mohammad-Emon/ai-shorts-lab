@@ -1,0 +1,27 @@
+# Core Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# HTTP Requests
+requests>=2.31.0
+httpx>=0.25.0
+
+# Data Validation
+pydantic>=2.4.0
+
+# Environment Management
+python-dotenv>=1.0.0
+
+# File Handling
+python-multipart>=0.0.6
+
+# Optional: Enhanced Features
+# torch>=2.0.0              # For advanced AI models
+# transformers>=4.35.0       # For LLM integration
+# opencv-python>=4.8.0       # For advanced video processing
+# Pillow>=10.0.0             # For image processing
+
+# Development (optional)
+# pytest>=7.4.0             # For testing
+# black>=23.0.0              # For code formatting
+# flake8>=6.0.0              # For linting

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silas AI Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .brand-icon {
+            font-size: 18px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .top-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .top-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Main Interface */
+        .main-interface {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Initial State - Centered Orb */
+        .initial-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* AI Orb */
+        .ai-orb {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            cursor: pointer;
+        }
+
+        .orb-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            background: conic-gradient(
+                from 0deg,
+                #1e40af 0deg,
+                #3b82f6 72deg,
+                #06b6d4 144deg,
+                #0891b2 216deg,
+                #1e40af 288deg,
+                #1e40af 360deg
+            );
+            animation: rotate 8s linear infinite;
+            box-shadow: 
+                0 0 60px rgba(59, 130, 246, 0.4),
+                0 0 120px rgba(59, 130, 246, 0.2),
+                inset 0 0 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .orb-gradient {
+            position: absolute;
+            inset: 3px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at 30% 30%,
+                rgba(59, 130, 246, 0.8) 0%,
+                rgba(29, 78, 216, 0.9) 40%,
+                rgba(15, 23, 42, 0.95) 100%
+            );
+        }
+
+        .orb-shine {
+            position: absolute;
+            top: 20%;
+            left: 25%;
+            width: 40%;
+            height: 40%;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 100%
+            );
+            filter: blur(1px);
+        }
+
+        /* Call Button */
+        .call-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .call-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .call-icon {
+            font-size: 16px;
+        }
+
+        /* Powered By */
+        .powered-by {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+        }
+
+        /* Chat State */
+        .chat-state {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Chat Header - Top message */
+        .chat-header {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 400;
+            z-index: 100;
+            white-space: nowrap;
+        }
+
+        /* Chat Messages - Hidden initially */
+        .chat-messages {
+            flex: 1;
+            padding: 140px 24px 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .chat-messages.show {
+            opacity: 1;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: slideUp 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .message.user .message-avatar {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .message.user .message-content {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Chat Input - Bottom centered */
+        .chat-input-area {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 80px);
+            max-width: 600px;
+            z-index: 100;
+        }
+
+        .input-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .input-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 50%, 
+                rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 24px;
+            pointer-events: none;
+        }
+
+        #messageInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-family: inherit;
+            z-index: 1;
+            position: relative;
+        }
+
+        #messageInput::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 8px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .end-chat-btn {
+            background: rgba(239, 68, 68, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: rgba(239, 68, 68, 0.9);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .end-chat-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .send-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .send-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Ready State */
+        .ready-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .ready-message {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+        }
+
+        .start-chat-btn {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .start-chat-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Animations */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .ai-orb {
+                width: 220px;
+                height: 220px;
+            }
+            
+            .chat-messages {
+                padding: 16px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="brand">
+            <span class="brand-icon">🤖</span>
+            <span class="brand-text">SilasLabs</span>
+        </div>
+        <div class="top-actions">
+            <button class="top-btn" id="chatHistoryBtn">💬</button>
+        </div>
+    </div>
+
+    <!-- Main Interface -->
+    <div class="main-interface" id="mainInterface">
+        <!-- Initial State -->
+        <div class="initial-state" id="initialState">
+            <div class="center-content">
+                <div class="ai-orb" id="aiOrb">
+                    <div class="orb-inner">
+                        <div class="orb-gradient"></div>
+                        <div class="orb-shine"></div>
+                    </div>
+                    <button class="call-button" id="callButton">
+                        <span class="call-icon">🎤</span>
+                        <span class="call-text">Call AI agent</span>
+                    </button>
+                </div>
+                <div class="powered-by">
+                    Powered by SilasLabs Agents
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat State -->
+        <div class="chat-state" id="chatState" style="display: none;">
+            <!-- Top Message -->
+            <div class="chat-header" id="chatHeader">
+                Hi there! How can I assist you today?
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+
+            <!-- Bottom Input -->
+            <div class="chat-input-area">
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Send a message to start the conversation"
+                        maxlength="500"
+                    >
+                    <div class="input-actions">
+                        <button class="end-chat-btn" id="endChatBtn">
+                            <span>✕</span>
+                            <span>End chat</span>
+                        </button>
+                        <button class="send-btn" id="sendBtn">
+                            <span class="send-icon">🎤</span>
+                            <span class="send-text">Send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ready State -->
+    <div class="ready-state" id="readyState" style="display: none;">
+        <div class="center-content">
+            <div class="ready-message">Ready to start chatting?</div>
+            <button class="start-chat-btn" id="startChatBtn">Start Chat</button>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let currentState = 'initial'; // 'initial', 'ready', 'chat'
+        
+        // Elements
+        const initialState = document.getElementById('initialState');
+        const readyState = document.getElementById('readyState');
+        const chatState = document.getElementById('chatState');
+        const callButton = document.getElementById('callButton');
+        const startChatBtn = document.getElementById('startChatBtn');
+        const endChatBtn = document.getElementById('endChatBtn');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatMessages = document.getElementById('chatMessages');
+
+        // State transitions
+        function showState(state) {
+            initialState.style.display = state === 'initial' ? 'flex' : 'none';
+            readyState.style.display = state === 'ready' ? 'flex' : 'none';
+            chatState.style.display = state === 'chat' ? 'flex' : 'none';
+            currentState = state;
+        }
+
+        // Event listeners
+        callButton.addEventListener('click', () => {
+            showState('ready');
+        });
+
+        startChatBtn.addEventListener('click', () => {
+            showState('chat');
+            // Show the top message and input, but no chat messages initially
+            setTimeout(() => {
+                messageInput.focus();
+            }, 300);
+        });
+
+        endChatBtn.addEventListener('click', () => {
+            chatMessages.innerHTML = '';
+            chatMessages.classList.remove('show');
+            showState('initial');
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Message handling
+        function addMessage(type, content) {
+            // Show chat messages area when first message is added
+            if (!chatMessages.classList.contains('show')) {
+                chatMessages.classList.add('show');
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'user' ? 'U' : 'S';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage('user', message);
+            messageInput.value = '';
+
+            // Simulate AI response
+            setTimeout(() => {
+                const responses = [
+                    "That's a fascinating question! Let me engage my multi-agent system to provide you with a comprehensive answer.",
+                    "🤖 My research and analysis agents are collaborating to give you the best possible response.",
+                    "Interesting! I'll have my creative and technical agents work together on this.",
+                    "Great question! My coordinator agent is routing this to the most appropriate specialists.",
+                    "Let me process that through my multi-agent workflow for the most accurate response."
+                ];
+                
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                addMessage('bot', response);
+            }, 1000 + Math.random() * 2000);
+        }
+
+        // Initialize
+        showState('initial');
+    </script>
+</body>
+</html>

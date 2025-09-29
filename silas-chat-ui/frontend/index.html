@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silas Chat - AI Avatar Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="avatar-info">
+                <div class="avatar-status online"></div>
+                <h1>Silas</h1>
+                <span class="status-text">AI Assistant</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="multiAgentBtn" title="Toggle Multi-Agent Mode">🤖</button>
+                <button class="btn-icon" id="settingsBtn">⚙️</button>
+                <button class="btn-icon" id="fullscreenBtn">⛶</button>
+            </div>
+        </header>
+
+        <!-- Avatar Section -->
+        <div class="avatar-section">
+            <div class="avatar-container" id="avatarContainer">
+                <div class="avatar-placeholder" id="avatarPlaceholder">
+                    <div class="avatar-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Initializing Silas...</p>
+                    </div>
+                </div>
+                <!-- D-ID iframe will be inserted here -->
+            </div>
+            <div class="avatar-controls">
+                <button class="btn-control" id="muteBtn">🔊</button>
+                <button class="btn-control" id="cameraBtn">📹</button>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">S</div>
+                    <div class="message-content">
+                        <p>Hello! I'm Silas, your AI assistant. How can I help you today?</p>
+                        <span class="message-time">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span>Silas is typing...</span>
+            </div>
+
+            <!-- Input Section -->
+            <div class="chat-input-section">
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Type your message..." 
+                        maxlength="500"
+                    >
+                    <button class="btn-send" id="sendBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="input-actions">
+                    <button class="btn-action" id="voiceBtn">🎤</button>
+                    <button class="btn-action" id="emojiBtn">😊</button>
+                    <span class="char-count" id="charCount">0/500</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner large"></div>
+            <h3>Connecting to Silas...</h3>
+            <p>Please wait while we establish the connection</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
